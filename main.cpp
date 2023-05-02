@@ -39,7 +39,7 @@ int main()
     cin >> type_of_puzzle;
     size = type_of_puzzle+1;
     int width = sqrt(size);
-    cout << "Welcome to (862259779)" + to_string(type_of_puzzle) + " puzzle solver.\n";
+    cout << "Welcome to (862259779) " + to_string(type_of_puzzle) + " puzzle solver.\n";
     int choice;
     vector<int> puzzle;
     do{
