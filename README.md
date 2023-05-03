@@ -2,5 +2,5 @@
 Eight_puzzle
 A program that solves the eight-puzzle using 
 1) Uniform Cost Search
-2) A* with the Misplaced Tile heuristic
+2) A* with the Misplaced Tile heuristic (Greedy Best First Search)
 3) A* with the Euclidean Distance heuristic
