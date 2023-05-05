@@ -6,13 +6,20 @@
 #include <algorithm>
 const int delta[4][2]{{-1,0},{0,-1},{1,0},{0,1}};// up, left,down,right
 using namespace std;
+struct Tree{
+
+};
 struct State{
     State(const State& s){puzzle = s.puzzle;_width = s._width;_g = s._g;_h = s._h;}
     State(vector<vector<int>> p,int width,int g,int h = 0):puzzle(p),_width(width),_g(g),_h(h){}
     vector<vector<int>> puzzle;
+    void set_parent(State *parent){
+        _parent = parent;
+    }
     int _width;
     int _g;
     int _h;
+    State* _parent;
     vector<int> get_blank_position(){
         for(int i = 0;i < _width;i++){
             for(int j = 0;j < _width;j++){
@@ -102,14 +109,19 @@ int Manhattan_Heuristic(vector<vector<int>> current,vector<vector<int>> goal,int
     vector<pair<int,int>> position1;
     vector<pair<int,int>> position2;
     int sum = 0;
+//    int sum2 = 0;
     // get the positions for all entries in each puzzle
     for(int i = 1;i <= size;i++){
         position1.emplace_back(get_position(current,i));
         position2.emplace_back(get_position(goal,i));
     }
     for(int i = 0;i < size;i++){
+//        sum += sqrt(pow(abs(position1[i].first - position2[i].first),2) +
+//                       pow(abs(position1[i].second - position2[i].second),2));
         sum += abs(position1[i].first - position2[i].first) +
                        abs(position1[i].second - position2[i].second);
+
+//        sum2 = round(sum);
     }
     return sum;
 }
@@ -124,50 +136,58 @@ State child_state(const State& s,int x,int y,int x2,int y2,int g,int h){
     return state;
 }
 
-void Expand(State &current,vector<vector<int>> goal,vector<State> &openStates,vector<State> &closeStates,int choice){
+int Expand(State &current,vector<vector<int>> goal,vector<State> &frontier,vector<State> &closeStates,int choice){
     int x = current.get_blank_position()[0];
     int y = current.get_blank_position()[1];
     int width = current._width;
     int g = current._g;
-
+    int nodes = 0;
     for(int i = 0;i < 4;i++){
         int x2 = x + delta[i][0];
         int y2 = y + delta[i][1];
         if(CheckVaildMove(x2,y2,width)){
             int g2 = g+1;
             int h2 = 0;
-            if(choice == 2){
-                h2 = Misplaced_Tile_Heuristic(current.puzzle,goal);
-            }else if(choice == 3){
-                h2 = Manhattan_Heuristic(current.puzzle,goal,width);
-            }
             State s = child_state(current,x,y,x2,y2,g2,h2);
+            if(choice == 2){
+                h2 = Misplaced_Tile_Heuristic(s.puzzle,goal);
+            }else if(choice == 3){
+                h2 = Manhattan_Heuristic(s.puzzle,goal,width);
+            }
+            s._h = h2;
+            s.set_parent(&current);
             if(!CheckCloseStates(closeStates,s)){
-                openStates.emplace_back(s);
+                frontier.emplace_back(s);
                 closeStates.emplace_back(s);
+                nodes = 1;
             }
         }
     }
+    return nodes;
 }
 
 bool Graph_Search(Problem p,vector<State> closeStates,int choice){
-    vector<State> openStates;
+    vector<State> frontier;
     State s(p.get_initial_state(),p.get_width(),0);
-    openStates.emplace_back(s);
+    s.set_parent(nullptr);
+    frontier.emplace_back(s);
     closeStates.emplace_back(s);
-
-    while(openStates.size() > 0){
-        Sort(&openStates);
-        State current(openStates.back());
-        openStates.pop_back();
+    int nodes = 0;
+    while(frontier.size() > 0){
+        Sort(&frontier);
+        State current(frontier.back());
+        frontier.pop_back();
         cout << "The best state to expand with g(n) = " + to_string(current._g) + " and h(n) = " + to_string(current._h) + " is...\n";
+        cout << "Number of expanded nodes: " << to_string(nodes) << endl;
         current.print_Puzzle();
         cout << endl;
         // check if we reach the goal state
         if(current.puzzle == p.get_goal_state()){
+            cout << "Number of expanded nodes: " << to_string(nodes) << endl;
+            cout << "Number of frontier nodes: " << to_string(frontier.size()) << endl;
             return true;
         }
-        Expand(current,p.get_goal_state(),openStates,closeStates,choice);
+        nodes += Expand(current,p.get_goal_state(),frontier,closeStates,choice);
     }
     return false;
 }
@@ -181,6 +201,7 @@ int main()
     size = type_of_puzzle+1;
     int width = sqrt(size);
     vector<vector<int>> goal_state = {{1,2,3},{4,5,6},{7,8,0}};
+//    vector<vector<int>> goal_state = {{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,0}};
     cout << "Welcome to (862259779) " + to_string(type_of_puzzle) + " puzzle solver.\n";
     Problem problem(width);
     int choice;
