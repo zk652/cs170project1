@@ -14,8 +14,8 @@ struct State{
     int _g;
     int _h;
     vector<int> get_blank_position(){
-        for(int i = 0;i < puzzle.size();i++){
-            for(int j = 0;j < puzzle.size();j++){
+        for(int i = 0;i < _width;i++){
+            for(int j = 0;j < _width;j++){
                 if(puzzle[i][j] == 0){
                     return vector<int>{i,j};
                 }
@@ -87,6 +87,32 @@ int Misplaced_Tile_Heuristic(vector<vector<int>> current,vector<vector<int>> goa
     }
     return count;
 }
+pair<int,int> get_position(vector<vector<int>> v,int entry){
+    for(int i = 0;i < v.size();i++){
+        for(int j = 0;j < v.size();j++){
+            if(v[i][j] == entry){
+                return make_pair(i,j);
+            }
+        }
+    }
+    return make_pair(-1,-1);
+}
+int Manhattan_Heuristic(vector<vector<int>> current,vector<vector<int>> goal,int width){
+    int size = width*width-1;
+    vector<pair<int,int>> position1;
+    vector<pair<int,int>> position2;
+    int sum = 0;
+    // get the positions for all entries in each puzzle
+    for(int i = 1;i <= size;i++){
+        position1.emplace_back(get_position(current,i));
+        position2.emplace_back(get_position(goal,i));
+    }
+    for(int i = 0;i < size;i++){
+        sum += abs(position1[i].first - position2[i].first) +
+                       abs(position1[i].second - position2[i].second);
+    }
+    return sum;
+}
 
 State child_state(const State& s,int x,int y,int x2,int y2,int g,int h){
     int num = s.puzzle[x2][y2];
@@ -98,7 +124,7 @@ State child_state(const State& s,int x,int y,int x2,int y2,int g,int h){
     return state;
 }
 
-void Expand(State &current,vector<vector<int>> goal,vector<State> &openStates,vector<State> &closeStates){
+void Expand(State &current,vector<vector<int>> goal,vector<State> &openStates,vector<State> &closeStates,int choice){
     int x = current.get_blank_position()[0];
     int y = current.get_blank_position()[1];
     int width = current._width;
@@ -109,7 +135,12 @@ void Expand(State &current,vector<vector<int>> goal,vector<State> &openStates,ve
         int y2 = y + delta[i][1];
         if(CheckVaildMove(x2,y2,width)){
             int g2 = g+1;
-            int h2 = Misplaced_Tile_Heuristic(current.puzzle,goal);
+            int h2 = 0;
+            if(choice == 2){
+                h2 = Misplaced_Tile_Heuristic(current.puzzle,goal);
+            }else if(choice == 3){
+                h2 = Manhattan_Heuristic(current.puzzle,goal,width);
+            }
             State s = child_state(current,x,y,x2,y2,g2,h2);
             if(!CheckCloseStates(closeStates,s)){
                 openStates.emplace_back(s);
@@ -119,22 +150,24 @@ void Expand(State &current,vector<vector<int>> goal,vector<State> &openStates,ve
     }
 }
 
-bool Graph_Search(Problem p,vector<State> closeStates){
+bool Graph_Search(Problem p,vector<State> closeStates,int choice){
     vector<State> openStates;
     State s(p.get_initial_state(),p.get_width(),0);
     openStates.emplace_back(s);
     closeStates.emplace_back(s);
 
     while(openStates.size() > 0){
-        cout << openStates.size() << endl;
         Sort(&openStates);
         State current(openStates.back());
         openStates.pop_back();
+        cout << "The best state to expand with g(n) = " + to_string(current._g) + " and h(n) = " + to_string(current._h) + " is...\n";
+        current.print_Puzzle();
+        cout << endl;
         // check if we reach the goal state
         if(current.puzzle == p.get_goal_state()){
             return true;
         }
-        Expand(current,p.get_goal_state(),openStates,closeStates);
+        Expand(current,p.get_goal_state(),openStates,closeStates,choice);
     }
     return false;
 }
@@ -181,13 +214,11 @@ int main()
     do{
         choices_of_algorithm();
         cin >> choice2;
-        if(choice2 == 1){
-            if(Graph_Search(problem,closeStates)){
-                cout << "Goal!\n";
-            }
-            else{
-                cout << "No!\n";
-            }
+        if(Graph_Search(problem,closeStates,choice2)){
+            cout << "Goal!\n";
+        }
+        else{
+            cout << "No!\n";
         }
     }while(choice2 != 1 && choice2 != 2 && choice2 != 3);
 
