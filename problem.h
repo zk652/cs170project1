@@ -9,7 +9,8 @@ public:
     Problem(int width = 0):_width(width){}      //constr
     void insert(std::vector<int> v);         // insert element to the puzzle
     void print_Puzzle();            // prints the puzzle
-    void default_Puzzle();          // generates a default puzzle
+    //void default_Puzzle();          // generates a default puzzle
+    void set_default_Puzzle();
     void set_goal_state(std::vector<std::vector<int>> v){goal_state = v;}
     std::vector<std::vector<int>> get_initial_state(){return initial_state;}
     std::vector<std::vector<int>> get_goal_state(){return goal_state;}

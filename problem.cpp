@@ -26,14 +26,18 @@ void Problem::print_Puzzle(){
     }
 }
 
-void Problem::default_Puzzle(){
-    initial_state[0].emplace_back(1);
-    initial_state[0].emplace_back(2);
-    initial_state[0].emplace_back(3);
-    initial_state[1].emplace_back(4);
-    initial_state[1].emplace_back(8);
-    initial_state[1].emplace_back(0);
-    initial_state[2].emplace_back(7);
-    initial_state[2].emplace_back(6);
-    initial_state[2].emplace_back(5);
+//void Problem::default_Puzzle(){
+//    initial_state[0].push_back(1);
+//    initial_state[0].push_back(2);
+//    initial_state[0].push_back(3);
+//    initial_state[1].push_back(4);
+//    initial_state[1].push_back(8);
+//    initial_state[1].push_back(0);
+//    initial_state[2].push_back(7);
+//    initial_state[2].push_back(6);
+//    initial_state[2].push_back(5);
+//}
+
+void Problem::set_default_Puzzle(){
+    initial_state = {{1,2,3},{4,8,0},{7,6,5}};
 }

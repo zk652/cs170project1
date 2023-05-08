@@ -210,7 +210,11 @@ int main()
         cout << "Type '1' to use a default puzzle, or '2' to enter your own puzzle.\n";
         cin >> choice;
         if(choice == 1){            // choice 1: use defalut puzzle
-            problem.default_Puzzle();
+            //problem.default_Puzzle();
+            if(choice == 1){            // choice 1: use default puzzle
+                problem.set_default_Puzzle();
+                problem.set_goal_state(goal_state);
+            }
         }
         if(choice == 2){            // choice 2: enter your own puzzle
             cout << "Enter your puzzle, use a zero to represent the blank\n";
